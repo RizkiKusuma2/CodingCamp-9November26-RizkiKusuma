@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense &amp; Budget Visualizer</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-theme="light">
+
+  <!-- Hamburger button (mobile only) -->
+  <button class="hamburger" id="btn-hamburger" aria-label="Buka menu navigasi">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1 class="app-title">Expense &amp; Budget Visualizer</h1>
+    </div>
+
+    <nav class="sidebar-nav" role="navigation" aria-label="Menu utama">
+      <a href="#" class="nav-link active" data-section="dashboard" aria-current="page">
+        Dashboard
+      </a>
+      <a href="#" class="nav-link" data-section="transactions">
+        Transaksi
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="btn-theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">
+        🌙 Dark Mode
+      </button>
+    </div>
+  </aside>
+
+  <!-- Overlay for mobile sidebar -->
+  <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+  <!-- Main Content -->
+  <main class="main-content" role="main">
+
+    <!-- Dashboard Section -->
+    <section id="section-dashboard" class="section">
+      <header class="section-header">
+        <h2>Dashboard</h2>
+      </header>
+
+      <!-- Summary Cards -->
+      <div class="summary-cards" id="summary-cards">
+        <div class="summary-card" id="card-total-expense">
+          <span class="card-label">Total Pengeluaran</span>
+          <span class="card-value" id="value-total-expense">Rp 0</span>
+        </div>
+        <div class="summary-card" id="card-total-transactions">
+          <span class="card-label">Total Transaksi</span>
+          <span class="card-value" id="value-total-transactions">0</span>
+        </div>
+        <div class="summary-card category-food" id="card-food">
+          <span class="card-label">🍔 Food</span>
+          <span class="card-value" id="value-food">Rp 0</span>
+        </div>
+        <div class="summary-card category-transport" id="card-transport">
+          <span class="card-label">🚌 Transport</span>
+          <span class="card-value" id="value-transport">Rp 0</span>
+        </div>
+        <div class="summary-card category-fun" id="card-fun">
+          <span class="card-label">🎉 Fun</span>
+          <span class="card-value" id="value-fun">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- Monthly Summary Filter -->
+      <div class="monthly-filter" id="monthly-filter">
+        <label for="input-month-filter">Ringkasan Bulanan:</label>
+        <input type="month" id="input-month-filter" />
+      </div>
+
+      <!-- Monthly Summary Display -->
+      <div class="monthly-summary" id="monthly-summary" style="display:none;">
+        <h3>Ringkasan Bulan Ini</h3>
+        <div class="monthly-cards" id="monthly-cards"></div>
+      </div>
+
+      <!-- Pie Chart -->
+      <div class="chart-container" id="chart-container">
+        <canvas id="chart-expense"></canvas>
+        <p class="chart-empty" id="chart-empty" style="display:none;">
+          Belum ada data untuk ditampilkan
+        </p>
+      </div>
+    </section>
+
+    <!-- Transactions Section -->
+    <section id="section-transactions" class="section hidden">
+      <header class="section-header">
+        <h2>Transaksi</h2>
+      </header>
+
+      <!-- Add Transaction Form -->
+      <div class="form-card">
+        <h3>Tambah Transaksi</h3>
+        <form id="form-transaction" novalidate>
+
+          <div class="form-group">
+            <label for="input-name">Nama Transaksi</label>
+            <input
+              type="text"
+              id="input-name"
+              name="name"
+              maxlength="100"
+              placeholder="Contoh: Makan siang"
+              autocomplete="off"
+            />
+            <span class="field-error" id="error-name"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-amount">Jumlah (Rp)</label>
+            <input
+              type="number"
+              id="input-amount"
+              name="amount"
+              min="1"
+              max="999999999999"
+              step="1"
+              placeholder="Contoh: 25000"
+            />
+            <span class="field-error" id="error-amount"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="select-category">Kategori</label>
+            <select id="select-category" name="category">
+              <option value="">-- Pilih Kategori --</option>
+              <option value="Food">Food</option>
+              <option value="Transport">Transport</option>
+              <option value="Fun">Fun</option>
+            </select>
+            <span class="field-error" id="error-category"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="input-date">Tanggal</label>
+            <input
+              type="date"
+              id="input-date"
+              name="date"
+            />
+            <span class="field-error" id="error-date"></span>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btn-save">Simpan</button>
+        </form>
+      </div>
+
+      <!-- Transaction Table -->
+      <div class="table-container">
+        <table class="transaction-table" id="transaction-table">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th class="sortable" data-sort="amount" id="th-amount">
+                Jumlah <span class="sort-indicator" id="sort-indicator-amount"></span>
+              </th>
+              <th>Kategori</th>
+              <th class="sortable" data-sort="date" id="th-date">
+                Tanggal <span class="sort-indicator" id="sort-indicator-date">▼</span>
+              </th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Rows rendered by UIRenderer -->
+          </tbody>
+        </table>
+        <p class="table-empty" id="table-empty" style="display:none;">
+          Belum ada transaksi
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Chart.js CDN (must load before app.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- App logic -->
+  <script src="js/app.js" defer></script>
+
+</body>
+</html>

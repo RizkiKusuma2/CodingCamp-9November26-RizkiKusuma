@@ -1,0 +1,317 @@
+/* ==========================================================================
+   CSS Custom Properties — Expense & Budget Visualizer
+   Requirements: 9.3 (consistent color palette), 12.2 (dark mode via data-theme)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   :root — Light theme defaults
+   -------------------------------------------------------------------------- */
+:root {
+  /* Brand colors */
+  --color-primary:    #4F46E5;
+  --color-accent:     #7C3AED;
+
+  /* Surface & background */
+  --color-bg:         #F8FAFC;
+  --color-surface:    #FFFFFF;
+
+  /* Text */
+  --color-text:       #1E293B;
+  --color-text-muted: #64748B;
+
+  /* Border & shadow */
+  --color-border:     #E2E8F0;
+  --color-shadow:     rgba(0, 0, 0, 0.08);
+
+  /* Category colors — shared between Chart.js and category badges */
+  --color-food:       #F97316;
+  --color-transport:  #3B82F6;
+  --color-fun:        #A855F7;
+}
+
+/* --------------------------------------------------------------------------
+   [data-theme="dark"] — Dark theme overrides (Requirement 12.2)
+   Applied by ThemeController via document.body.setAttribute('data-theme', 'dark')
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  --color-primary:    #818CF8;
+  --color-accent:     #A78BFA;
+  --color-bg:         #0F172A;
+  --color-surface:    #1E293B;
+  --color-text:       #F1F5F9;
+  --color-text-muted: #94A3B8;
+  --color-border:     #334155;
+  --color-shadow:     rgba(0, 0, 0, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   Base reset & body
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ==========================================================================
+   Utility
+   ========================================================================== */
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Layout — Sidebar + Main Content
+   Requirements: 7.1, 7.4, 9.2
+   ========================================================================== */
+
+/* Desktop: sidebar fixed on the left, main content fills the rest */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  box-shadow: 2px 0 8px var(--color-shadow);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform 0.25s ease;
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar sections
+   -------------------------------------------------------------------------- */
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.app-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-footer {
+  padding: 16px 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* --------------------------------------------------------------------------
+   Navigation links
+   Requirements: 7.3 — active link visually distinct (not color alone)
+   -------------------------------------------------------------------------- */
+.nav-link {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-link:hover {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Active state: color change + left border indicator (not color alone) */
+.nav-link.active {
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Hamburger button — hidden on desktop, shown on mobile
+   Requirements: 7.4
+   -------------------------------------------------------------------------- */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 200;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 2px 6px var(--color-shadow);
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--color-text);
+  border-radius: 2px;
+  transition: background-color 0.15s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Sidebar overlay — mobile
+   -------------------------------------------------------------------------- */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 90;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile styles — viewport ≤ 768px
+   Requirements: 7.4, 7.5, 7.6, 9.2
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Hide sidebar off-screen by default */
+  .sidebar {
+    transform: translateX(-100%);
+    width: 240px;
+    min-width: 200px;
+  }
+
+  /* Show sidebar as overlay when .open is toggled */
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Show overlay backdrop when sidebar is open */
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  /* Hamburger visible on mobile */
+  .hamburger {
+    display: flex;
+  }
+
+  /* Main content spans full width, with top padding for hamburger */
+  .main-content {
+    margin-left: 0;
+    padding: 72px 16px 24px;
+  }
+}
+
+/* ==========================================================================
+   Theme toggle button
+   ========================================================================== */
+.theme-toggle {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--color-border);
+}
+
+/* ==========================================================================
+   Sections
+   ========================================================================== */
+.section {
+  max-width: 960px;
+}
+
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Dashboard cards and chart */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.summary-card, .form-card, .monthly-summary, .chart-container {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+.summary-card { display: flex; flex-direction: column; gap: 8px; padding: 20px; }
+.card-label { color: var(--color-text-muted); font-size: 14px; }
+.card-value { font-size: 22px; font-weight: 700; }
+.monthly-filter { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+.monthly-filter input, input, select { color: var(--color-text); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 6px; padding: 10px; font: inherit; }
+.monthly-summary, .chart-container, .form-card { padding: 20px; margin: 20px 0; }
+.monthly-cards { display: flex; flex-wrap: wrap; gap: 12px; }
+.chart-container { max-width: 600px; }
+.chart-container canvas { max-height: 360px; }
+.form-card h3 { margin-top: 0; }
+#form-transaction { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.field-error { color: #B91C1C; font-size: 14px; min-height: 1.2em; }
+.btn-primary, .btn-delete { border: 0; border-radius: 6px; padding: 10px 16px; font: inherit; cursor: pointer; }
+.btn-primary { align-self: end; background: var(--color-primary); color: white; }
+.btn-delete { background: #DC2626; color: white; }
+.table-container { overflow-x: auto; background: var(--color-surface); border-radius: 10px; }
+.transaction-table { width: 100%; border-collapse: collapse; text-align: left; }
+.transaction-table th, .transaction-table td { padding: 12px 14px; border-bottom: 1px solid var(--color-border); }
+.transaction-table tbody tr:nth-child(even) { background: var(--color-bg); }
+.sortable { cursor: pointer; }
+.category-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+.category-badge--food { color: #9A3412; background: #FFEDD5; }
+.category-badge--transport { color: #1E40AF; background: #DBEAFE; }
+.category-badge--fun { color: #6B21A8; background: #F3E8FF; }
+.table-empty, .chart-empty { color: var(--color-text-muted); text-align: center; padding: 24px; }
+
+@media (max-width: 768px) {
+  .summary-cards { grid-template-columns: 1fr; }
+  #form-transaction { grid-template-columns: 1fr; }
+  .table-container { max-width: 100%; }
+}
